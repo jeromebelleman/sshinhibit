@@ -7,7 +7,11 @@ import psutil
 
 def main():
 
-    inhibit = ['systemd-inhibit', 'sleep', 'infinity']
+    inhibit = ['systemd-inhibit',
+        '--what=idle:sleep:shutdown:handle-lid-switch',
+        'sleep',
+        'infinity']
+
     if sys.argv[1] == 'login':
         for proc in psutil.process_iter():
             if inhibit == proc.cmdline():
