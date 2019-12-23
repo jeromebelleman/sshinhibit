@@ -1,18 +1,30 @@
 #! /usr/bin/env python
 
+'''
+Prevent sleep when SSH clients are connected
+'''
+
 import sys
+import argparse
 import subprocess
 import daemon
 import psutil
 
 def main():
+    '''
+    Run
+    '''
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=['login', 'logout'])
+    args = parser.parse_args()
 
     inhibit = ['systemd-inhibit',
-        '--what=idle:sleep:shutdown:handle-lid-switch',
-        'sleep',
-        'infinity']
+               '--what=idle:sleep:shutdown:handle-lid-switch',
+               'sleep',
+               'infinity']
 
-    if sys.argv[1] == 'login':
+    if args.mode == 'login':
         for proc in psutil.process_iter():
             if inhibit == proc.cmdline():
                 return
@@ -20,7 +32,7 @@ def main():
         print "Starting inhibitor"
         with daemon.DaemonContext():
             subprocess.call(inhibit)
-    elif sys.argv[1] == 'logout':
+    elif args.mode == 'logout':
         terms = 0
         for usr in psutil.users():
             if usr.host != 'localhost':
